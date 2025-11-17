@@ -9,10 +9,10 @@ function App() {
 
   const [title, setTitle] = useState('');
   const [search, setSearch] = useState('');
-  const [columns, setColumns] = useState(30);
+  const [columns, setColumns] = useState(20);
 
   const [grid, setGrid] = useState(() =>
-    Array(6).fill(null).map(() => Array(30).fill(''))
+    Array(6).fill(null).map(() => Array(20).fill(''))
   );
 
   const gridRefs = useRef([]);
@@ -23,44 +23,25 @@ function App() {
   }, [tabs]);
 
   const handleKeyDown = (row, col, e) => {
-    if (e.key === 'Tab') {
+    if (['Tab', 'Enter', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
       e.preventDefault();
-      const nextCol = e.shiftKey ? col - 1 : col + 1;
-      if (nextCol >= 0 && nextCol < columns) {
-        gridRefs.current[row][nextCol]?.focus();
-      } else if (!e.shiftKey && col === columns - 1) {
+    }
+
+    let newRow = row;
+    let newCol = col;
+
+    if (e.key === 'Tab' || e.key === 'ArrowRight') {
+      newCol = e.shiftKey ? col - 1 : (col < columns - 1 ? col + 1 : columns);
+      if (newCol === columns) {
         addColumn();
-        setTimeout(() => gridRefs.current[row][nextCol + 1]?.focus(), 0);
+        setTimeout(() => gridRefs.current[row][newCol]?.focus(), 50);
       }
     }
+    if (e.key === 'ArrowLeft') newCol = col > 0 ? col - 1 : 0;
+    if (e.key === 'Enter' || e.key === 'ArrowDown') newRow = row < 5 ? row + 1 : row;
+    if (e.key === 'ArrowUp') newRow = row > 0 ? row - 1 : 0;
 
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const nextRow = row + 1;
-      if (nextRow < 6) {
-        gridRefs.current[nextRow][col]?.focus();
-      }
-    }
-
-    // ARROW KEY NAVIGATION (Up/Down/Left/Right)
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-      e.preventDefault();
-      let newRow = row;
-      let newCol = col;
-
-      if (e.key === 'ArrowUp' && row > 0) newRow = row - 1;
-      if (e.key === 'ArrowDown' && row < 5) newRow = row + 1;
-      if (e.key === 'ArrowLeft' && col > 0) newCol = col - 1;
-      if (e.key === 'ArrowRight') {
-        if (col < columns - 1) newCol = col + 1;
-        else {
-          addColumn();
-          setTimeout(() => gridRefs.current[row][newCol + 1]?.focus(), 0);
-        }
-      }
-
-      gridRefs.current[newRow][newCol]?.focus();
-    }
+    gridRefs.current[newRow][newCol]?.focus();
   };
 
   const updateNote = (row, col, value) => {
@@ -79,21 +60,20 @@ function App() {
 
   const saveTab = () => {
     if (!title.trim()) return alert('Enter song title!');
-    const tabLines = stringOrder.map((str, i) => {
-      return str + '|' + grid[i].map(note => note || '-').join('-');
-    }).join('\n');
+    const tabLines = stringOrder.map((str, i) =>
+      str + '|' + grid[i].map(note => note || '-').join('-')
+    ).join('\n');
 
-    const newTab = {
+    setTabs(prev => [{
       id: Date.now(),
       title: title.trim(),
       tab: tabLines,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    };
+    }, ...prev]);
 
-    setTabs(prev => [newTab, ...prev]);
     setTitle('');
-    setGrid(Array(6).fill(null).map(() => Array(30).fill('')));
-    setColumns(30);
+    setGrid(Array(6).fill(null).map(() => Array(20).fill('')));
+    setColumns(20);
     alert('Tab saved!');
   };
 
@@ -120,7 +100,7 @@ function App() {
           setTabs(data);
           alert('Backup restored!');
         }
-      } catch { alert('Invalid backup file'); }
+      } catch { alert('Invalid file'); }
       e.target.value = '';
     };
     reader.readAsText(file);
@@ -129,35 +109,35 @@ function App() {
   const filteredTabs = tabs.filter(t => t.title.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        <header className="text-center mb-10">
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-green-400 to-cyan-500 bg-clip-text text-transparent">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white pb-24">
+      <div className="max-w-7xl mx-auto px-4 pt-6">
+        <header className="text-center mb-8">
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-green-400 to-cyan-500 bg-clip-text text-transparent">
             Easy Guitar Tabs
           </h1>
-          {/* Subheader removed as requested */}
         </header>
 
-        <div className="bg-gray-900 rounded-3xl shadow-2xl border border-gray-800 overflow-hidden">
-          <div className="p-8 pb-4">
+        <div className="bg-gray-900/80 backdrop-blur rounded-3xl shadow-2xl border border-gray-800 overflow-hidden">
+          <div className="p-5">
             <input
               type="text"
-              placeholder="Song Title (Required)"
+              placeholder="Song Title (e.g. Tum Hi Ho)"
               value={title}
               onChange={e => setTitle(e.target.value)}
-              className="w-full px-6 py-4 mb-6 bg-gray-800 rounded-xl text-2xl text-center focus:outline-none focus:ring-4 focus:ring-green-500"
+              className="w-full px-5 py-4 bg-gray-800/80 rounded-2xl text-xl text-center focus:outline-none focus:ring-4 focus:ring-green-500"
             />
           </div>
 
-          <div className="overflow-x-auto relative">
-            <div className="min-w-max">
-              <div className="space-y-3 px-8 pb-8">
+          {/* Mobile-Optimized Grid */}
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="min-w-max px-5 pb-6">
+              <div className="space-y-4">
                 {stringOrder.map((str, row) => (
                   <div key={str} className="flex items-center gap-3">
-                    <div className="w-16 text-right text-green-400 font-bold text-xl sticky left-0 bg-gray-900 z-20 pr-2 -ml-8 pl-2">
+                    <div className="w-14 text-right text-green-400 font-bold text-xl sticky left-0 bg-gray-900/80 backdrop-blur z-20 -ml-5 pl-3 pr-1 shadow-2xl">
                       {str}|
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-2">
                       {grid[row].map((note, col) => (
                         <input
                           key={col}
@@ -169,8 +149,8 @@ function App() {
                           value={note}
                           onChange={e => updateNote(row, col, e.target.value)}
                           onKeyDown={e => handleKeyDown(row, col, e)}
-                          className="w-20 h-14 bg-gray-800 border border-gray-700 rounded-lg text-center text-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                          placeholder="-----"
+                          className="w-16 md:w-20 h-16 bg-gray-800/90 border border-gray-700 rounded-xl text-center text-xl font-mono focus:outline-none focus:ring-4 focus:ring-green-500 transition-all"
+                          placeholder="—"
                           maxLength="5"
                         />
                       ))}
@@ -181,50 +161,54 @@ function App() {
             </div>
           </div>
 
-          <div className="flex gap-4 p-8 justify-center flex-wrap items-center border-t border-gray-800 bg-gray-900">
-            <button onClick={saveTab} className="px-10 py-5 bg-green-600 hover:bg-green-700 rounded-xl text-xl font-bold transition transform hover:scale-105">
+          {/* Floating + Button (Mobile Bottom Right) */}
+          <button
+            onClick={addColumn}
+            className="fixed bottom-6 right-6 w-16 h-16 bg-green-600 hover:bg-green-700 rounded-full flex items-center justify-center text-4xl font-bold shadow-2xl z-50 transition transform active:scale-90"
+          >
+            +
+          </button>
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 md:flex md:justify-center gap-4 p-6 border-t border-gray-800 bg-gray-900/90">
+            <button onClick={saveTab} className="px-8 py-5 bg-green-600 hover:bg-green-700 rounded-2xl font-bold text-lg transition transform active:scale-95">
               Save Tab
             </button>
-            <button onClick={exportAll} className="px-8 py-5 bg-blue-600 hover:bg-blue-700 rounded-xl text-xl font-bold">
+            <button onClick={exportAll} className="px-8 py-5 bg-blue-600 hover:bg-blue-700 rounded-2xl font-bold text-lg transition transform active:scale-95">
               Export All
             </button>
-            <label className="px-8 py-5 bg-orange-600 hover:bg-orange-700 rounded-xl text-xl font-bold cursor-pointer">
-              Restore Backup
+            <label className="px-8 py-5 bg-orange-600 hover:bg-orange-700 rounded-2xl font-bold text-lg cursor-pointer text-center transition transform active:scale-95">
+              Restore
               <input type="file" accept=".json" onChange={restoreFromBackup} className="hidden" />
             </label>
-            <button
-              onClick={addColumn}
-              className="w-16 h-16 bg-green-600 hover:bg-green-700 rounded-xl flex items-center justify-center text-4xl font-bold shadow-lg transition transform hover:scale-110"
-              title="Add new column"
-            >
-              +
-            </button>
           </div>
         </div>
 
-        <div className="mt-10">
+        {/* Search */}
+        <div className="mt-8">
           <input
             type="text"
-            placeholder="Search your tabs..."
+            placeholder="Search tabs..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full px-6 py-4 bg-gray-800 rounded-xl text-xl focus:outline-none focus:ring-4 focus:ring-green-500"
+            className="w-full px-6 py-4 bg-gray-800/80 rounded-2xl text-lg focus:outline-none focus:ring-4 focus:ring-green-500"
           />
         </div>
 
-        <div className="mt-8 space-y-6">
+        {/* Saved Tabs */}
+        <div className="mt-8 space-y-5">
           {filteredTabs.length === 0 ? (
-            <p className="text-center text-gray-500 text-2xl py-20">
-              {search ? 'No tabs found' : 'Start creating your first tab!'}
+            <p className="text-center text-gray-500 text-xl py-20">
+              {search ? 'No tabs found' : 'Your first tab awaits!'}
             </p>
           ) : (
             filteredTabs.map(tab => (
-              <div key={tab.id} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 hover:border-green-600 transition">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-3xl font-bold text-green-400">{tab.title}</h3>
-                  <button onClick={() => deleteTab(tab.id)} className="text-red-500 hover:text-red-400 text-xl">Delete</button>
+              <div key={tab.id} className="bg-gray-900/80 backdrop-blur rounded-2xl p-6 border border-gray-800">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-2xl font-bold text-green-400">{tab.title}</h3>
+                  <button onClick={() => deleteTab(tab.id)} className="text-red-500 text-lg">Delete</button>
                 </div>
-                <pre className="bg-black p-6 rounded-xl font-mono text-lg overflow-x-auto">
+                <pre className="bg-black/50 p-5 rounded-xl font-mono text-sm overflow-x-auto">
                   {tab.tab}
                 </pre>
               </div>
