@@ -33,6 +33,7 @@ function App() {
         setTimeout(() => gridRefs.current[row][nextCol + 1]?.focus(), 0);
       }
     }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       const nextRow = row + 1;
@@ -40,10 +41,29 @@ function App() {
         gridRefs.current[nextRow][col]?.focus();
       }
     }
+
+    // ARROW KEY NAVIGATION (Up/Down/Left/Right)
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+      let newRow = row;
+      let newCol = col;
+
+      if (e.key === 'ArrowUp' && row > 0) newRow = row - 1;
+      if (e.key === 'ArrowDown' && row < 5) newRow = row + 1;
+      if (e.key === 'ArrowLeft' && col > 0) newCol = col - 1;
+      if (e.key === 'ArrowRight') {
+        if (col < columns - 1) newCol = col + 1;
+        else {
+          addColumn();
+          setTimeout(() => gridRefs.current[row][newCol + 1]?.focus(), 0);
+        }
+      }
+
+      gridRefs.current[newRow][newCol]?.focus();
+    }
   };
 
   const updateNote = (row, col, value) => {
-    // Allow up to 5 valid guitar tab characters
     const clean = value.replace(/[^0-9hpbr~\\\/.|]/gi, '').slice(0, 5);
     setGrid(prev => {
       const newGrid = prev.map(r => [...r]);
@@ -74,7 +94,7 @@ function App() {
     setTitle('');
     setGrid(Array(6).fill(null).map(() => Array(30).fill('')));
     setColumns(30);
-    alert('Tab saved successfully!');
+    alert('Tab saved!');
   };
 
   const deleteTab = (id) => setTabs(prev => prev.filter(t => t.id !== id));
@@ -115,33 +135,28 @@ function App() {
           <h1 className="text-6xl font-bold bg-gradient-to-r from-green-400 to-cyan-500 bg-clip-text text-transparent">
             Easy Guitar Tabs
           </h1>
-          <p className="text-gray-400 text-xl mt-2">Fixed headers • Up to 5 chars per box • Made in India</p>
+          {/* Subheader removed as requested */}
         </header>
 
         <div className="bg-gray-900 rounded-3xl shadow-2xl border border-gray-800 overflow-hidden">
           <div className="p-8 pb-4">
             <input
               type="text"
-              placeholder="Song Title (e.g. Tum Hi Ho)"
+              placeholder="Song Title (Required)"
               value={title}
               onChange={e => setTitle(e.target.value)}
               className="w-full px-6 py-4 mb-6 bg-gray-800 rounded-xl text-2xl text-center focus:outline-none focus:ring-4 focus:ring-green-500"
             />
           </div>
 
-          {/* Scrollable Area with Fixed Left Column */}
           <div className="overflow-x-auto relative">
             <div className="min-w-max">
-              {/* Main Grid */}
               <div className="space-y-3 px-8 pb-8">
                 {stringOrder.map((str, row) => (
                   <div key={str} className="flex items-center gap-3">
-                    {/* FIXED STRING LABEL */}
                     <div className="w-16 text-right text-green-400 font-bold text-xl sticky left-0 bg-gray-900 z-20 pr-2 -ml-8 pl-2">
                       {str}|
                     </div>
-
-                    {/* Scrollable Note Boxes */}
                     <div className="flex gap-1">
                       {grid[row].map((note, col) => (
                         <input
@@ -166,7 +181,6 @@ function App() {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-4 p-8 justify-center flex-wrap items-center border-t border-gray-800 bg-gray-900">
             <button onClick={saveTab} className="px-10 py-5 bg-green-600 hover:bg-green-700 rounded-xl text-xl font-bold transition transform hover:scale-105">
               Save Tab
@@ -188,7 +202,6 @@ function App() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="mt-10">
           <input
             type="text"
@@ -199,7 +212,6 @@ function App() {
           />
         </div>
 
-        {/* Saved Tabs */}
         <div className="mt-8 space-y-6">
           {filteredTabs.length === 0 ? (
             <p className="text-center text-gray-500 text-2xl py-20">
