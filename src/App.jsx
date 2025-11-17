@@ -94,13 +94,13 @@ function App() {
 
   return (
     <>
-      {/* Dark/Light Toggle — Only Sun/Moon Icons */}
+      {/* Dark/Light Toggle — Real Sun & Moon Icons */}
       <button
         onClick={() => setIsDark(!isDark)}
         className="fixed top-6 right-6 z-50 w-14 h-14 bg-gray-800/90 backdrop-blur-lg rounded-full flex items-center justify-center text-2xl shadow-2xl hover:scale-110 transition-all border border-gray-700"
         aria-label="Toggle dark/light mode"
       >
-        {isDark ? 'Dark' : 'Light'}
+        {isDark ? '🌞' : '🌙'}
       </button>
 
       <div className={`min-h-screen transition-all duration-500 ${isDark ? 'bg-gradient-to-b from-black via-gray-900 to-black' : 'bg-gradient-to-b from-gray-50 via-white to-gray-100'} text-${isDark ? 'white' : 'gray-900'}`}>
@@ -152,7 +152,7 @@ function App() {
               </div>
             </div>
 
-            {/* 4 Clean Buttons — "+ Column" → "Add Tab" */}
+            {/* 4 Clean Buttons — "Add Tab" */}
             <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 border-t ${isDark ? 'border-gray-800 bg-gray-900/95' : 'border-gray-300 bg-gray-50'}`}>
               <button onClick={saveTab} className="py-5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-2xl font-bold text-xl shadow-lg transition transform active:scale-95 text-white">
                 Save Tab
@@ -203,14 +203,14 @@ function App() {
           </div>
         </div>
 
-        {/* Floating Share Button — Only Icon */}
-        <button
-          onClick={shareTabs}
-          className="fixed bottom-8 right-6 w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-3xl shadow-2xl z-50 hover:scale-110 active:scale-95 transition-all"
-          aria-label="Share"
-        >
-          Share
-        </button>
+        {/* Floating Share Button — Real Share Icon */}
+<button
+  onClick={shareTabs}
+  className="fixed bottom-8 right-6 w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-3xl shadow-2xl z-50 hover:scale-110 active:scale-95 transition-all"
+  aria-label="Share tabs"
+>
+    <i class="material-icons">share</i>
+</button>
       </div>
     </>
   );
