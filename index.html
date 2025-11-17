@@ -3,10 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/easy-guitar-tabs/vite.svg" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Easy Guitar Tabs</title>
-    <script type="module" crossorigin src="/easy-guitar-tabs/assets/index-D8MBg77_.js"></script>
-    <link rel="stylesheet" crossorigin href="/easy-guitar-tabs/assets/index-DZ3N737f.css">
+    <script>
+      if (localStorage.getItem('easyGuitarTabs-theme') === 'dark' || !localStorage.getItem('easyGuitarTabs-theme')) {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+    <script type="module" crossorigin src="/easy-guitar-tabs/assets/index-BhOv3hMb.js"></script>
+    <link rel="stylesheet" crossorigin href="/easy-guitar-tabs/assets/index-HHLBZxqf.css">
   </head>
   <body>
     <div id="root"></div>
